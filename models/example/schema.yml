@@ -8,10 +8,49 @@ sources:
     tables:
       - name: sales
         identifier: raw_gz_sales
-        description: table for sales of Greenweez
+        description: sales of Greenweez / we have on row per product_id found in each orders_id
+        # Freshness testing - for freshest data in sales table is more than 90 days ago
+        loaded_at_field: "CAST(date_date AS TIMESTAMP)"
+        freshness:
+          warn_after:
+            count: 90
+            period: day
+        columns:
+          - name: date_date
+            description: date of purchase
+          - name: orders_id
+            description: id of each order/primary key of table    
+          - name: product_id
+            description: id of each product/foreign key
+          - name: revenue
+            description: revenue of each order
+          - name: quantity
+            description: quantity of product per order
+        tests:
+          - unique:
+              column_name: "(pdt_id ||'-'|| orders_id)"
       - name: products
         identifier: raw_gz_product
         description: table for products data of Greenweez
+        columns:
+          - name: products_id
+            description: id of each product/primary key of table
+            tests:
+              - unique
+              - not_null  
+          - name: purchase_price
+            description: price of each product
       - name: ship
         identifier: raw_gz_ship
         description: table for shipping data of Greenweez
+        columns:
+          - name: orders_id
+            description: id of each order/primary key of table
+            tests:
+              - unique  
+          - name: shipping_fee
+            description: fee for shipping each order
+          - name: logcost
+            description: logistics cost of each order
+          - name: ship_cost
+            description: cost of shipping each order
